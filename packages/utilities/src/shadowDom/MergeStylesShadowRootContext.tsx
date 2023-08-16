@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useMergeStylesRootStylesheets_unstable } from './MergeStylesRootContext';
-import { getDocument, getWindow } from '../dom';
 import { FocusRectsProvider } from '../FocusRectsProvider';
 
 /**
@@ -41,6 +40,7 @@ export const MergeStylesShadowRootProvider_unstable: React.FC<
 
   return (
     <MergeStylesShadowRootContext.Provider value={value} {...props}>
+      <GlobalStyles />
       <FocusRectsProvider providerRef={focusProviderRef}>
         <div className="shadow-dom-focus-provider" ref={focusProviderRef}>
           {props.children}
@@ -72,31 +72,22 @@ export const MergeStylesShadowRootConsumer: React.FC<MergeStylesContextConsumerP
   // return <>{children}</>;
 };
 
-// const GlobalStyles: React.FC = props => {
-//   // useAdoptedStylesheet_unstable('@fluentui/style-utilities', true);
-//   // useAdoptedStylesheet_unstable('__global__', true);
-//   return null;
-// };
+const GlobalStyles: React.FC = props => {
+  // useAdoptedStylesheet_unstable('@fluentui/style-utilities', true);
+  useAdoptedStylesheet_unstable('__global__');
+  return null;
+};
 
 /**
  * NOTE: This API is unstable and subject to breaking change or removal without notice.
  */
-export const useAdoptedStylesheet_unstable = (stylesheetKey: string, adopteGlobally: boolean = false): boolean => {
+export const useAdoptedStylesheet_unstable = (stylesheetKey: string): boolean => {
   const shadowCtx = useMergeStylesShadowRootContext_unstable();
   const rootMergeStyles = useMergeStylesRootStylesheets_unstable();
   // console.log('useAdoptedStylesheets', stylesheetKey);
 
   if (!shadowCtx) {
     return false;
-  }
-
-  if (adopteGlobally) {
-    const doc = getDocument();
-    const win = getWindow();
-    const stylesheet = win?.__mergeStylesAdoptedStyleSheets__?.get(stylesheetKey)?.getAdoptableStyleSheet();
-    if (doc && stylesheet && !doc.adoptedStyleSheets.includes(stylesheet)) {
-      doc.adoptedStyleSheets = [...doc.adoptedStyleSheets, stylesheet];
-    }
   }
 
   if (shadowCtx.shadowRoot && !shadowCtx.stylesheets.has(stylesheetKey)) {
